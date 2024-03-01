@@ -1,9 +1,14 @@
-package com.project.proo;
+package com.project.proo.usreInfo;
 
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.List;
+
+import com.project.proo.postInfo.Comment;
+import com.project.proo.postInfo.Like;
+import com.project.proo.postInfo.Post;
+import com.project.proo.profileInfo.Profile;
 
 @Entity
 @Data

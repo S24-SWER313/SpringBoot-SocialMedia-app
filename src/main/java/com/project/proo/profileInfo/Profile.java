@@ -1,4 +1,8 @@
-package com.project.proo;
+package com.project.proo.profileInfo;
+
+import java.time.LocalDate;
+
+import com.project.proo.usreInfo.User;
 
 import jakarta.persistence.*;
 @Entity
@@ -7,8 +11,11 @@ public class Profile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     
-    private String username;
     private String bio;
+    private LocalDate dob;
+    private String city;
+    private Gender gender;
+    
 
     // pic field could be added here
     

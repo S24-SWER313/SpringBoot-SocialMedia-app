@@ -1,6 +1,8 @@
-package com.project.proo;
+package com.project.proo.postInfo;
 
 import java.util.List;
+
+import com.project.proo.usreInfo.User;
 
 import jakarta.persistence.*;
 
