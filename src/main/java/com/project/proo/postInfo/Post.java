@@ -1,4 +1,4 @@
-package com.project.proo;
+package com.project.proo.postInfo;
 
 import lombok.Data;
 
@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.project.proo.usreInfo.User;
 
 @Entity
 @Data
