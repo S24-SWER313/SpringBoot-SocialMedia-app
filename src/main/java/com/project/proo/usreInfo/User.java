@@ -3,8 +3,14 @@ package com.project.proo.usreInfo;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.project.proo.postInfo.Comment;
 import com.project.proo.postInfo.Like;
 import com.project.proo.postInfo.Post;
@@ -27,21 +33,28 @@ public class User {
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "friend_id")
     )
-    private List<User> friends;
+    @JsonIgnoreProperties("friends") // Ignore friends to prevent recursion
+    private List<User> friends = new ArrayList<>();
+
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+   @JsonBackReference
     private Profile profile;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Post> posts;
  
     @OneToMany(mappedBy = "user")
+    @JsonManagedReference
     private List<Post> sharedPosts;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Like> likes;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Comment> comments;
   
 }
