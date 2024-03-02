@@ -1,4 +1,4 @@
-package com.project.proo;
+package com.project.proo.postInfo;
 
 
 import jakarta.persistence.*;

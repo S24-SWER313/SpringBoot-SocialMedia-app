@@ -1,7 +1,10 @@
-package com.project.proo;
+package com.project.proo.postInfo;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.project.proo.usreInfo.User;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
