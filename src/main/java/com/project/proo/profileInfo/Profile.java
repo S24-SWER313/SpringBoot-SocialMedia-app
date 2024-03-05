@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import com.project.proo.usreInfo.User;
 
 import jakarta.persistence.*;
+import lombok.Data;
+@Data
 @Entity
 public class Profile {
     @Id
