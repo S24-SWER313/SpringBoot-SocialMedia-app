@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.project.proo.postInfo.Comment;
@@ -18,6 +19,7 @@ import com.project.proo.profileInfo.Profile;
 
 @Entity
 @Data
+
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,34 +29,43 @@ public class User {
     private String password;
     private String email;
 
+    
+
+    public User(String username, String password, String email) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+    }
+
     @ManyToMany
     @JoinTable(
         name = "user_friends",
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "friend_id")
     )
-    @JsonIgnoreProperties("friends") // Ignore friends to prevent recursion
+    @JsonIgnore
     private List<User> friends = new ArrayList<>();
 
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-   @JsonBackReference
+   @JsonIgnore
     private Profile profile;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonIgnore
     private List<Post> posts;
  
     @OneToMany(mappedBy = "user")
-    @JsonManagedReference
+    @JsonIgnore
     private List<Post> sharedPosts;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonIgnore
     private List<Like> likes;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonIgnore
     private List<Comment> comments;
   
 }
+

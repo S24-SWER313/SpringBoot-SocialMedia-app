@@ -2,6 +2,7 @@ package com.project.proo.postInfo;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.project.proo.usreInfo.User;
 
 import jakarta.persistence.*;
@@ -18,5 +19,6 @@ public abstract class Like {
     
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonBackReference
     private  User user; 
 }

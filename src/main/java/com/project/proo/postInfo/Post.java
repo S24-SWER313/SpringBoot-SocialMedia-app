@@ -25,6 +25,7 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
      @JsonManagedReference
     private List <imagevideo> imageVideo;
+    
    // boolean isShared=false;
    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")

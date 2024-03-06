@@ -1,5 +1,7 @@
 package com.project.proo.postInfo;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -12,6 +14,7 @@ public class imagevideo {
 
     @ManyToOne
     @JoinColumn(name = "post_id")
+    @JsonBackReference
    private Post post;
    
     private String caption;
