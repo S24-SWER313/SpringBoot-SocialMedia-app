@@ -7,11 +7,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.project.proo.usreInfo.User;
 
 @Entity
 @Data
 public class Post {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -20,20 +23,26 @@ public class Post {
     String caption;
     
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+     @JsonManagedReference
     private List <imagevideo> imageVideo;
+    
    // boolean isShared=false;
-    @ManyToOne
+   @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
+     @JsonBackReference
     private User user;
 
  
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<PostLike> likers;
 
    
  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+ @JsonManagedReference
     private List<Comment> comments = new ArrayList<>();
 
+ 
     public void addComment(User user, String commentContent) {
         Comment comment = new Comment();
        
