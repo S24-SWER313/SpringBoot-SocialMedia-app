@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.project.proo.profileInfo.Gender;
 import com.project.proo.usreInfo.User;
 
 @Entity
@@ -21,14 +22,15 @@ public class Post {
 
     private LocalDateTime date;
     String caption;
-    
+    private Privacy audiance;
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-     @JsonManagedReference
+    @JsonManagedReference
     private List <imagevideo> imageVideo;
-   // boolean isShared=false;
-   @ManyToOne(cascade = CascadeType.ALL)
+   
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
-     @JsonBackReference
+    @JsonBackReference
     private User user;
 
  
@@ -37,8 +39,8 @@ public class Post {
     private List<PostLike> likers;
 
    
- @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
- @JsonManagedReference
+   @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+   @JsonManagedReference
     private List<Comment> comments = new ArrayList<>();
 
  

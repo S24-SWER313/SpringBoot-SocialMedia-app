@@ -1,6 +1,7 @@
 package com.project.proo.profileInfo;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import com.project.proo.usreInfo.User;
 
@@ -24,6 +25,4 @@ public class Profile {
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
-
-    // getters and setters
 }

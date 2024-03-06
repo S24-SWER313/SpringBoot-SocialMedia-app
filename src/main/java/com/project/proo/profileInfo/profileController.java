@@ -1,8 +1,21 @@
 package com.project.proo.profileInfo;
 
+import java.util.Optional;
+
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.project.proo.usreInfo.User;
+import com.project.proo.usreInfo.UserController;
+import com.project.proo.usreInfo.UserNotFoundException;
+import com.project.proo.usreInfo.UserRepository;
 
 // Other imports...
 
@@ -11,32 +24,54 @@ public class profileController {
 
     private final ProfileRepository profileRepository;
     private final ProfileModelAssembler assembler;
+    private final UserRepository userRepository;
 
-    public profileController(ProfileRepository profileRepository, ProfileModelAssembler assembler) {
+    public profileController(ProfileRepository profileRepository, ProfileModelAssembler assembler, UserRepository userRepository) {
         this.profileRepository = profileRepository;
         this.assembler = assembler;
+        this.userRepository=userRepository;
     }
 
-    @PutMapping("/users/{userId}/profile")
-    public ResponseEntity<?> updateProfile(@PathVariable Integer userId, @RequestBody Profile updatedProfile) {
+      @GetMapping("/users/{userId}/profile")
+      public ResponseEntity<?> getProfile(@PathVariable Integer userId) {
         // Retrieve the user's profile by user ID
         Profile profile = profileRepository.findByUserId(userId)
                 .orElseThrow(() -> new ProfileNotFoundException(userId));
 
-        // Update profile information
+        EntityModel<Profile> entityModel = assembler.toModel(profile);
+
+        return ResponseEntity.ok(entityModel);
+    }
+
+
+    @PutMapping("/users/{userId}/profile")
+    public ResponseEntity<?> updateProfile(@PathVariable Integer userId, @RequestBody Profile updatedProfile) {
+       
+        Profile profile = profileRepository.findByUserId(userId)
+                .orElseThrow(() -> new ProfileNotFoundException(userId));
+
         profile.setBio(updatedProfile.getBio());
         profile.setDob(updatedProfile.getDob());
         profile.setCity(updatedProfile.getCity());
         profile.setGender(updatedProfile.getGender());
-        // Update other fields as needed...
 
-        // Save the updated profile
         Profile savedProfile = profileRepository.save(profile);
 
-        // Convert the saved profile to an EntityModel
         EntityModel<Profile> entityModel = assembler.toModel(savedProfile);
 
-        // Return response with the updated profile
         return ResponseEntity.ok(entityModel);
     }
+
+    @PostMapping("/users/{userId}/profiles")
+    ResponseEntity<?> addPofile(@RequestBody Profile newProfile) {
+
+		EntityModel<Profile> entityModel = assembler.toModel(profileRepository.save(newProfile));
+
+		return ResponseEntity //
+				.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
+				.body(entityModel);
+	}
+    
+
+    
 }

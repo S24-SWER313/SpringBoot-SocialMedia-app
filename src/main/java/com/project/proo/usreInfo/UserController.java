@@ -52,6 +52,16 @@ public EntityModel<User> getUser(@PathVariable Integer userId) {
     return assembler.toModel(user);
 }
 
+
+@GetMapping("/users")
+public CollectionModel<EntityModel<User>> getAllUsers() {
+    List<EntityModel<User>> users = userRepository.findAll().stream()
+            .map(assembler::toModel)
+            .collect(Collectors.toList());
+
+    return CollectionModel.of(users, linkTo(methodOn(UserController.class).getAllUsers()).withSelfRel());
+}
+
 @GetMapping("users/{userId}/friends")
 public CollectionModel<EntityModel<User>> getUserFriends(@PathVariable Integer userId) {
     User user = userRepository.findById(userId)
@@ -63,15 +73,9 @@ public CollectionModel<EntityModel<User>> getUserFriends(@PathVariable Integer u
 
     return CollectionModel.of(friends);
 }
+
 @PostMapping("/users")
- //User createUser(@RequestBody User newUser) {
-    
-  //  User savedUser = userRepository.save(newUser);
-    //return userRepository.save(newUser);
-    // EntityModel<User> userEntityModel = assembler.toModel(savedUser);
-    // return ResponseEntity.created(userEntityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
-    //                      .body(userEntityModel);
-    ResponseEntity<?> newUser(@RequestBody User newUser) {
+ResponseEntity<?> newUser(@RequestBody User newUser) {
 
 		EntityModel<User> entityModel = assembler.toModel(userRepository.save(newUser));
 
@@ -87,46 +91,51 @@ public ResponseEntity<?> addFriendsToUser(@PathVariable Integer userId, @Request
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException(userId));
 
-    // Assuming you have a method to find users by their IDs
     List<User> friendsToAdd = userRepository.findAllById(friendIds);
 
-    // Manually add each friend to the user's friend list
     friendsToAdd.forEach(friend -> {
         if (!user.getFriends().contains(friend)) {
             user.getFriends().add(friend);
         }
     });
 
-    // Save the updated user
     userRepository.save(user);
-
     return ResponseEntity.ok().build();
 }
 
-/////need to be checked 
 @PutMapping("/users/{userId}")
 public ResponseEntity<?> updateUser(@PathVariable Integer userId, @RequestBody User updatedUser) {
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException(userId));
 
-    // Update user information
     user.setUsername(updatedUser.getUsername());
     user.setPassword(updatedUser.getPassword());
     user.setEmail(updatedUser.getEmail());
 
-    // Save the updated user
     User savedUser = userRepository.save(user);
 
-    // Convert the saved user to an EntityModel
     EntityModel<User> entityModel = assembler.toModel(savedUser);
 
-    // Return response with the updated user
     return ResponseEntity.ok(entityModel);
 }
 
+@PostMapping("/users/{userId}/friends/{friendId}")
+public ResponseEntity<?> addFriendToUser(@PathVariable Integer userId, @PathVariable Integer friendId) {
 
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException(userId));
 
+    User friend = userRepository.findById(friendId)
+            .orElseThrow(() -> new UserNotFoundException(friendId));
 
+    if (!user.getFriends().contains(friend)) {
+        user.getFriends().add(friend);
+    }
+
+    userRepository.save(user);
+
+    return ResponseEntity.ok().build();
+}
 
     
 }
