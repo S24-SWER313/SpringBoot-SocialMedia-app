@@ -29,7 +29,7 @@ public class User {
     private String password;
     private String email;
 
-    
+    public User(){}
 
     public User(String username, String password, String email) {
         this.username = username;
@@ -47,7 +47,7 @@ public class User {
     private List<User> friends = new ArrayList<>();
 
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne( mappedBy = "user", cascade = CascadeType.ALL)
    @JsonIgnore
     private Profile profile;
 

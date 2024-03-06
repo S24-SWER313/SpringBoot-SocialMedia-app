@@ -66,6 +66,30 @@ public CollectionModel<EntityModel<Post>> all(@PathVariable("userid") Integer us
     return CollectionModel.of(posts, linkTo(methodOn(PostController.class).all(userId)).withSelfRel());
 }
 
-  
+@PostMapping("/posts")
+ResponseEntity<?> addPofile(@RequestBody Post newPost) {
+
+    EntityModel<Post> entityModel = assembler.toModel(postRepository.save(newPost));
+
+    return ResponseEntity //
+            .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
+            .body(entityModel);
+}
+
+
+@PutMapping("/posts/{postId}") // Specify the postId in the mapping
+public ResponseEntity<?> editPost(@PathVariable Integer postId, @RequestBody Post updatedPost) {
+    Post post = postRepository.findById(postId) // Find post by postId, not userId
+            .orElseThrow(() -> new PostNotFoundException(postId));
+
+    post.setCaption(updatedPost.getCaption());
+    post.setAudiance(updatedPost.getAudiance()); 
+
+    Post savedPost = postRepository.save(post);
+    EntityModel<Post> entityModel = assembler.toModel(savedPost);
+
+    return ResponseEntity.ok(entityModel);
+}
+ 
     
 }

@@ -12,7 +12,6 @@ public class UserModelAssembler implements RepresentationModelAssembler<User, En
     @Override
     public EntityModel<User> toModel(User user) {
         return EntityModel.of(user,
-                linkTo(methodOn(UserController.class).getUser(user.getId())).withSelfRel(),
-                linkTo(methodOn(UserController.class).getUser(user.getId())).withRel("users"));
+                linkTo(methodOn(UserController.class).getUser(user.getId())).withSelfRel());
     }
 }

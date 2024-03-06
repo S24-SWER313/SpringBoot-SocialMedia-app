@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import jakarta.transaction.Transactional;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import org.apache.el.stream.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -38,9 +39,11 @@ public class UserController {
   private final UserRepository userRepository;
   private final UserModelAssembler assembler;
 
+
 public UserController(UserRepository userRepository, UserModelAssembler assembler) {
     this.userRepository = userRepository;
     this.assembler = assembler;
+
 }
 
 @GetMapping("users/{userId}")
@@ -52,8 +55,17 @@ public EntityModel<User> getUser(@PathVariable Integer userId) {
     return assembler.toModel(user);
 }
 
-@GetMapping("users/{userId}/friends")
-public CollectionModel<EntityModel<User>> getUserFriends(@PathVariable Integer userId) {
+@GetMapping("/users")
+public CollectionModel<EntityModel<User>> getAllUsers() {
+    List<EntityModel<User>> users = userRepository.findAll().stream()
+            .map(assembler::toModel)
+            .collect(Collectors.toList());
+
+    return CollectionModel.of(users, linkTo(methodOn(UserController.class).getAllUsers()).withSelfRel());
+}
+
+@GetMapping("/users/{userId}/friends")
+public ResponseEntity<CollectionModel<EntityModel<User>>> getUserFriends(@PathVariable Integer userId) {
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException(userId));
 
@@ -61,16 +73,15 @@ public CollectionModel<EntityModel<User>> getUserFriends(@PathVariable Integer u
             .map(assembler::toModel)
             .collect(Collectors.toList());
 
-    return CollectionModel.of(friends);
+    CollectionModel<EntityModel<User>> collectionModel = CollectionModel.of(friends,
+            linkTo(methodOn(UserController.class).getUserFriends(userId)).withSelfRel());
+
+    return ResponseEntity.ok(collectionModel);
 }
+
+
 @PostMapping("/users")
- //User createUser(@RequestBody User newUser) {
-    
-  //  User savedUser = userRepository.save(newUser);
-    //return userRepository.save(newUser);
-    // EntityModel<User> userEntityModel = assembler.toModel(savedUser);
-    // return ResponseEntity.created(userEntityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
-    //                      .body(userEntityModel);
+
     ResponseEntity<?> newUser(@RequestBody User newUser) {
 
 		EntityModel<User> entityModel = assembler.toModel(userRepository.save(newUser));
@@ -83,21 +94,17 @@ public CollectionModel<EntityModel<User>> getUserFriends(@PathVariable Integer u
 
 
 @PostMapping("/users/{userId}/friends")
-public ResponseEntity<?> addFriendsToUser(@PathVariable Integer userId, @RequestParam List<Integer> friendIds) {
+public ResponseEntity<?> addFriendsToUser(@PathVariable Integer userId, @RequestParam Integer friendIds) {
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException(userId));
 
-    // Assuming you have a method to find users by their IDs
-    List<User> friendsToAdd = userRepository.findAllById(friendIds);
+    User friend = userRepository.findById(friendIds)
+    .orElseThrow(() -> new UserNotFoundException(userId));
 
-    // Manually add each friend to the user's friend list
-    friendsToAdd.forEach(friend -> {
-        if (!user.getFriends().contains(friend)) {
-            user.getFriends().add(friend);
-        }
-    });
-
-    // Save the updated user
+    if (!user.getFriends().contains(friend)) {
+        user.getFriends().add(friend);
+        friend.getFriends().add(user);
+}
     userRepository.save(user);
 
     return ResponseEntity.ok().build();

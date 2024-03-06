@@ -21,7 +21,7 @@ public class Comment {
 
     @ManyToOne(optional = false) // Make the association mandatory
     @JoinColumn(name = "post_id")
-   @JsonBackReference
+    @JsonBackReference
     private Post post;
 
     @ManyToOne

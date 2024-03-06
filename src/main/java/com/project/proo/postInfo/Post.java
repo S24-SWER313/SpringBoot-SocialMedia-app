@@ -19,17 +19,18 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    private Privacy Audiance;
     private LocalDateTime date;
     String caption;
     
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-     @JsonManagedReference
+    @JsonManagedReference
     private List <imagevideo> imageVideo;
     
    // boolean isShared=false;
-   @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(optional = false,cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
-     @JsonBackReference
+    @JsonBackReference
     private User user;
 
  
@@ -37,9 +38,8 @@ public class Post {
     @JsonManagedReference
     private List<PostLike> likers;
 
-   
- @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
- @JsonManagedReference
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Comment> comments = new ArrayList<>();
 
  
@@ -51,6 +51,8 @@ public class Post {
         comment.setUser(user);   
         this.comments.add(comment);
     }
+
+    
     public void sharePost(User user) {
         if (user != null) {
             // Create a new shared post
