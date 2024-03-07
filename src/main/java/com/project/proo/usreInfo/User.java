@@ -55,7 +55,7 @@ public class User {
     @JsonIgnore
     private List<Post> posts;
  
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Post> sharedPosts;
 

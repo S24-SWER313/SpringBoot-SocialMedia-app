@@ -15,7 +15,7 @@ public class PostModelAssembler implements RepresentationModelAssembler<Post, En
    Integer userId = post.getUser().getId();
 
     return EntityModel.of(post, //
-        linkTo(methodOn(PostController.class).one(post.getId())).withSelfRel(),
+        linkTo(methodOn(PostController.class).one(userId,post.getId())).withSelfRel(),
         linkTo(methodOn(PostController.class).all(userId)).withRel("Posts"));
   }
  
