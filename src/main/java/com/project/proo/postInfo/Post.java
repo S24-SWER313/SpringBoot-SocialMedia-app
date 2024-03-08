@@ -24,7 +24,7 @@ public class Post {
     private LocalDateTime date;
     String caption;
     public Post(Privacy audiance, LocalDateTime date, String caption) {
-        audiance = audiance;
+      this.audiance = audiance;
         this.date = date;
         this.caption = caption;
     }
