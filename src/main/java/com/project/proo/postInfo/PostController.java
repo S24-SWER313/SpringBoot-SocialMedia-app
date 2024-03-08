@@ -77,7 +77,7 @@ public CollectionModel<EntityModel<Post>> all(@PathVariable("userid") Integer us
                 .orElseThrow(() -> new UserNotFoundException(userid));
     
                 newPost.setUser(user);
-    
+            
         Post savedPost = postRepository.save(newPost);
         EntityModel<Post> entityModel = assembler.toModel(savedPost);
     
@@ -112,33 +112,69 @@ public ResponseEntity<?> deletePost(@PathVariable("userid") Integer userid, @Pat
     return ResponseEntity.noContent().build();
 }
 
+// @PostMapping("/shared-posts")
+// public ResponseEntity<?> addsharePost(@PathVariable Integer userid, @RequestParam Integer postId) {
+//     User user = UserRepository.findById(userid)
+//             .orElseThrow(() -> new UserNotFoundException(userid));
+
+//     Post post =postRepository.findById(postId).orElseThrow(()-> new PostNotFoundException(postId) );
+
+//     if (!user.getSharedPosts().contains(post)) {
+//         user.getSharedPosts().add(post);
+      
+// }
+// post.setUser(user);
+// postRepository.save(post);
+//     UserRepository.save(user);
+
+//    URI location = ServletUriComponentsBuilder
+//             .fromCurrentRequest()
+//             .path("/{postId}")
+//             .buildAndExpand(post.getId())
+//             .toUri();
+
+//     return ResponseEntity.created(location).build();
+// }
 @PostMapping("/shared-posts")
 public ResponseEntity<?> addsharePost(@PathVariable Integer userid, @RequestParam Integer postId) {
-    User user = UserRepository.findById(userid)
+    // Retrieve the user who is sharing the post
+    User sharingUser = UserRepository.findById(userid)
             .orElseThrow(() -> new UserNotFoundException(userid));
 
-    Post post =postRepository.findById(postId).orElseThrow(()-> new PostNotFoundException(postId) );
+    // Retrieve the post to be shared
+    Post originalPost = postRepository.findById(postId)
+            .orElseThrow(() -> new PostNotFoundException(postId));
 
-    if (!user.getSharedPosts().contains(post)) {
-        user.getSharedPosts().add(post);
-      
-}
-    UserRepository.save(user);
+    // Create a new post instance for sharing
+    Post sharedPost = new Post(originalPost.getAudiance(), originalPost.getDate(), originalPost.getCaption());
+    sharedPost.setUser(sharingUser);
 
-   URI location = ServletUriComponentsBuilder
+    // Save the shared post
+    Post savedSharedPost = postRepository.save(sharedPost);
+
+    // Add the shared post to the original user's shared posts list
+    sharingUser.getSharedPosts().add(savedSharedPost);
+    UserRepository.save(sharingUser);
+
+    // Return the URI of the shared post
+    URI location = ServletUriComponentsBuilder
             .fromCurrentRequest()
             .path("/{postId}")
-            .buildAndExpand(post.getId())
+            .buildAndExpand(savedSharedPost.getId())
             .toUri();
 
     return ResponseEntity.created(location).build();
 }
 
 
+
 @GetMapping("/shared-posts")
 public CollectionModel<EntityModel<Post>> getSharedPosts(@PathVariable("userid") Integer userid) {
+    User User = UserRepository.findById(userid)
+    .orElseThrow(() -> new UserNotFoundException(userid));
+   
     
-    List<EntityModel<Post>> sharedPosts = postRepository.findByUser_SharedPosts_User_Id(userid).stream()
+    List<EntityModel<Post>> sharedPosts = User.getSharedPosts().stream()
             .map(assembler::toModel)
             .collect(Collectors.toList());
 
