@@ -32,7 +32,7 @@ public class profileController {
         this.userRepository=userRepository;
     }
 
-      @GetMapping("/users/{userId}/profile")
+      @GetMapping("/users/{userId}/profiles")
       public ResponseEntity<?> getProfile(@PathVariable Integer userId) {
         // Retrieve the user's profile by user ID
         Profile profile = profileRepository.findByUserId(userId)
@@ -44,7 +44,7 @@ public class profileController {
     }
 
 
-    @PutMapping("/users/{userId}/profile")
+    @PutMapping("/users/{userId}/profiles")
     public ResponseEntity<?> updateProfile(@PathVariable Integer userId, @RequestBody Profile updatedProfile) {
        
         Profile profile = profileRepository.findByUserId(userId)
@@ -61,17 +61,20 @@ public class profileController {
 
         return ResponseEntity.ok(entityModel);
     }
-
-    @PostMapping("/users/{userId}/profiles")
-    ResponseEntity<?> addPofile(@RequestBody Profile newProfile) {
-
-		EntityModel<Profile> entityModel = assembler.toModel(profileRepository.save(newProfile));
-
-		return ResponseEntity //
-				.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
-				.body(entityModel);
-	}
     
-
+    @PostMapping("/users/{userId}/profiles")
+    public ResponseEntity<?> addProfile(@PathVariable Integer userId, @RequestBody Profile newProfile) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+    
+        newProfile.setUser(user);
+    
+        Profile savedProfile = profileRepository.save(newProfile);
+        EntityModel<Profile> entityModel = assembler.toModel(savedProfile);
+    
+        return ResponseEntity
+                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                .body(entityModel);
+    }
     
 }
