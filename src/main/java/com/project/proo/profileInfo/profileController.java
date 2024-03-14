@@ -61,4 +61,20 @@ public class profileController {
 
         return ResponseEntity.ok(entityModel);
     }
+    
+    @PostMapping("/users/{userId}/profiles")
+    public ResponseEntity<?> addProfile(@PathVariable Integer userId, @RequestBody Profile newProfile) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+    
+        newProfile.setUser(user);
+    
+        Profile savedProfile = profileRepository.save(newProfile);
+        EntityModel<Profile> entityModel = assembler.toModel(savedProfile);
+    
+        return ResponseEntity
+                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                .body(entityModel);
+    }
+    
 }

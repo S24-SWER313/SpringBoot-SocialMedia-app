@@ -10,7 +10,7 @@ import lombok.Data;
 @Table(name = "comment_like")
 @DiscriminatorValue("comment")
 public class CommentLike extends Like {
-    @ManyToOne
+    @ManyToOne(optional = false) 
     @JoinColumn(name = "comment_id")
        //@JsonBackReference
         @JsonIgnore

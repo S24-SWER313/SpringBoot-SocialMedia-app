@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.project.proo.usreInfo.User;
 
+
 @Entity
 @Data
 public class Post {
