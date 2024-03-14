@@ -1,92 +1,102 @@
 package com.project.proo.postInfo;
 
-import java.util.stream.Collectors;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.proo.profileInfo.ProfileNotFoundException;
 import com.project.proo.usreInfo.User;
 import com.project.proo.usreInfo.UserNotFoundException;
 import com.project.proo.usreInfo.UserRepository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import jakarta.transaction.Transactional;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/users/{userid}")
-public class PostController {
-    
-  private final PostRepository postRepository;
-  private final PostModelAssembler assembler;
-  private final UserRepository userRepository;
+@RequestMapping("/posts/{postId}/comments")
+public class CommentController {
 
-public PostController(PostRepository postRepository,PostModelAssembler assembler, UserRepository userRepository) {
-       this.postRepository = postRepository;
-       this.assembler=assembler;
-       this.userRepository=userRepository;
-}
+    private final CommentRepository commentRepository;
+    private final CommentModelAssembler assembler;
+    private final PostRepository postRepository;
+    private final UserRepository userRepository;
+    private final CommentLikeRepository commentLikeRepository;
 
-@GetMapping("/posts/{postid}")
-@Transactional
-public EntityModel<Post> one(@PathVariable("postid") Integer postid) {
+    public CommentController(CommentRepository commentRepository, CommentModelAssembler assembler,
+                             PostRepository postRepository, UserRepository userRepository,
+                             CommentLikeRepository commentLikeRepository) {
+        this.commentRepository = commentRepository;
+        this.assembler = assembler;
+        this.postRepository = postRepository;
+        this.userRepository = userRepository;
+        this.commentLikeRepository = commentLikeRepository;
+    }
 
-    Post post = postRepository.findById(postid) //
-        .orElseThrow(() -> new PostNotFoundException(postid));
-  
-    return assembler.toModel(post);
-}
+    @GetMapping("/{commentId}")
+    public EntityModel<Comment> getComment(@PathVariable Integer postId,@PathVariable Integer commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException(commentId));
+        return assembler.toModel(comment);
+    }
 
-@GetMapping("/posts")
-public CollectionModel<EntityModel<Post>> all(@PathVariable("userid") Integer userId) {
-    List<EntityModel<Post>> posts = postRepository.findByUserId(userId).stream()
-            .map(assembler::toModel)
-            .collect(Collectors.toList());
+    @GetMapping
+    public CollectionModel<EntityModel<Comment>> getCommentsByPost(@PathVariable Integer postId) {
+        List<EntityModel<Comment>> comments = commentRepository.findByPost_Id(postId).stream()
+                .map(assembler::toModel)
+                .collect(Collectors.toList());
+        return CollectionModel.of(comments);
+    }
 
-    return CollectionModel.of(posts, linkTo(methodOn(PostController.class).all(userId)).withSelfRel());
-}
+    @PostMapping("/users/{commentUserId}")
+    public ResponseEntity<?> addComment(@PathVariable Integer postId, @PathVariable Integer commentUserId,
+                                        @RequestBody Comment newComment) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException(postId));
 
-@PostMapping("/posts")
-ResponseEntity<?> addPofile(@RequestBody Post newPost) {
+        User user = userRepository.findById(commentUserId)
+                .orElseThrow(() -> new UserNotFoundException(commentUserId));
 
-    EntityModel<Post> entityModel = assembler.toModel(postRepository.save(newPost));
+        newComment.setDate(LocalDateTime.now());
+        newComment.setPost(post);
+        newComment.setUser(user);
 
-    return ResponseEntity //
-            .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
-            .body(entityModel);
-}
+        Comment savedComment = commentRepository.save(newComment);
+        EntityModel<Comment> entityModel = assembler.toModel(savedComment);
 
+        return ResponseEntity
+                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                .body(entityModel);
+    }
 
-@PutMapping("/posts/{postId}") // Specify the postId in the mapping
-public ResponseEntity<?> editPost(@PathVariable Integer postId, @RequestBody Post updatedPost) {
-    Post post = postRepository.findById(postId) // Find post by postId, not userId
-            .orElseThrow(() -> new PostNotFoundException(postId));
+    @PutMapping("/{commentId}")
+    public ResponseEntity<?> editComment(@PathVariable Integer commentId, @RequestBody Comment updatedComment) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException(commentId));
 
-    post.setCaption(updatedPost.getCaption());
-    post.setAudiance(updatedPost.getAudiance()); 
+        comment.setCommentContent(updatedComment.getCommentContent());
 
-    Post savedPost = postRepository.save(post);
-    EntityModel<Post> entityModel = assembler.toModel(savedPost);
+        Comment savedComment = commentRepository.save(comment);
+        EntityModel<Comment> entityModel = assembler.toModel(savedComment);
 
-    return ResponseEntity.ok(entityModel);
-}
+        return ResponseEntity.ok(entityModel);
+    }
 
-}
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<?> deleteComment(@PathVariable Integer commentId) {
+        if (!commentRepository.existsById(commentId)) {
+            throw new CommentNotFoundException(commentId);
+        }
+
+        // Delete related CommentLikes
+        commentLikeRepository.deleteByComment_Id(commentId);
+
+        commentRepository.deleteById(commentId);
+
+        return ResponseEntity.noContent().build();
+    }}
+
