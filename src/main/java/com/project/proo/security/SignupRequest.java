@@ -9,7 +9,7 @@ public class SignupRequest {
   }
 
   @NotBlank
-  @Size(min = 3, max = 20)
+  @Size(min = 3, max = 20,message = "The Size of username mustbe between 3 and 20")
   private String username;
 
   @NotBlank
@@ -24,10 +24,10 @@ public class SignupRequest {
     this.password = password;
   }
 
-  private Set<String> role;
 
-  @NotBlank
-  @Size(min = 6, max = 40)
+  @Size(min = 6, max = 40, message = "The size must be between 6 and 40!")
+  @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{6,40}$",
+          message = "Password must contain at least one digit, one lowercase letter, one uppercase letter, one special character, and be 6-40 characters long!")
   private String password;
 
   public String getUsername() {
@@ -54,11 +54,5 @@ public class SignupRequest {
     this.password = password;
   }
 
-  public Set<String> getRole() {
-    return this.role;
-  }
 
-  public void setRole(Set<String> role) {
-    this.role = role;
-  }
 }

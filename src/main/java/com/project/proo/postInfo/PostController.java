@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -72,7 +74,7 @@ public CollectionModel<EntityModel<Post>> all(@PathVariable("userid") Integer us
 
 
 @PostMapping("/posts")
-   public ResponseEntity<?> addPosts(@PathVariable Integer userid, @RequestBody Post newPost) {
+   public ResponseEntity<?> addPosts(@PathVariable Integer userid,@Valid @RequestBody Post newPost) {
         User user = UserRepository.findById(userid)
                 .orElseThrow(() -> new UserNotFoundException(userid));
     
@@ -88,7 +90,7 @@ public CollectionModel<EntityModel<Post>> all(@PathVariable("userid") Integer us
 
 
 @PutMapping("/posts/{postId}") // Specify the postId in the mapping
-public ResponseEntity<?> editPost(@PathVariable Integer postId, @RequestBody Post updatedPost) {
+public ResponseEntity<?> editPost(@PathVariable Integer postId,@Valid @RequestBody Post updatedPost) {
     Post post = postRepository.findById(postId) // Find post by postId, not userId
             .orElseThrow(() -> new PostNotFoundException(postId));
 
@@ -112,29 +114,7 @@ public ResponseEntity<?> deletePost(@PathVariable("userid") Integer userid, @Pat
     return ResponseEntity.noContent().build();
 }
 
-// @PostMapping("/shared-posts")
-// public ResponseEntity<?> addsharePost(@PathVariable Integer userid, @RequestParam Integer postId) {
-//     User user = UserRepository.findById(userid)
-//             .orElseThrow(() -> new UserNotFoundException(userid));
 
-//     Post post =postRepository.findById(postId).orElseThrow(()-> new PostNotFoundException(postId) );
-
-//     if (!user.getSharedPosts().contains(post)) {
-//         user.getSharedPosts().add(post);
-      
-// }
-// post.setUser(user);
-// postRepository.save(post);
-//     UserRepository.save(user);
-
-//    URI location = ServletUriComponentsBuilder
-//             .fromCurrentRequest()
-//             .path("/{postId}")
-//             .buildAndExpand(post.getId())
-//             .toUri();
-
-//     return ResponseEntity.created(location).build();
-// }
 @PostMapping("/shared-posts")
 public ResponseEntity<?> addsharePost(@PathVariable Integer userid, @RequestParam Integer postId) {
     // Retrieve the user who is sharing the post
