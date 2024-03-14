@@ -1,4 +1,5 @@
-package com.project.proo.usreInfo;
+package com.project.proo.postInfo;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
@@ -6,11 +7,8 @@ import java.util.Optional;
 import com.project.proo.postInfo.Post;
 
 
-public interface UserRepository  extends JpaRepository<User, Integer> {
-    Optional<User> findByUsername(String username);
-    
-    Boolean existsByUsername(String username);
+public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    Boolean existsByEmail(String email);
-  
+
+    
 }
