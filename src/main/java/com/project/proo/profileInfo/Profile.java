@@ -1,7 +1,6 @@
 package com.project.proo.profileInfo;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import com.project.proo.usreInfo.User;
 
@@ -22,7 +21,23 @@ public class Profile {
 
     // pic field could be added here
     
-    @OneToOne
+    public Profile() {
+    }
+
+    
+
+    public Profile(String bio, LocalDate dob, String city, Gender gender) {
+        this.bio = bio;
+        this.dob = dob;
+        this.city = city;
+        this.gender = gender;
+    }
+
+
+
+    @OneToOne(optional = false)
     @JoinColumn(name = "user_id")
     private User user;
+
+    // getters and setters
 }
