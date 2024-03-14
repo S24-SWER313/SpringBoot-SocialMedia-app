@@ -1,3 +1,5 @@
+package com.project.proo.usreInfo;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
