@@ -6,4 +6,3 @@ public class ProfileNotFoundException extends RuntimeException {
       super("Could not find profile " + id);
     }
   }
-
