@@ -174,6 +174,29 @@ public CollectionModel<EntityModel<Post>> getSharedPosts(@PathVariable("userid")
     return CollectionModel.of(sharedPosts,
             linkTo(methodOn(PostController.class).getSharedPosts(userid)).withSelfRel());
 }
+@DeleteMapping("/shared-posts/{sharedPostId}")
+public ResponseEntity<?> unsharePost(@PathVariable("userid") Integer userId, @PathVariable("sharedPostId") Integer sharedPostId) {
+    // Check if the shared post exists
+    if (!postRepository.existsById(sharedPostId)) {
+        throw new PostNotFoundException(sharedPostId);
+    }
+    
+    // Retrieve the shared post
+    Post sharedPost = postRepository.findById(sharedPostId)
+            .orElseThrow(() -> new PostNotFoundException(sharedPostId));
+
+    // Check if the shared post belongs to the user
+    if (!sharedPost.getUser().getId().equals(userId)) {
+        throw new UnsupportedOperationException("You are not authorized to unshare this post.");
+    }
+
+    // Delete the shared post
+    postRepository.deleteById(sharedPostId);
+
+    // Return a response indicating successful deletion
+    return ResponseEntity.noContent().build();
+}
+
     
 
 }
