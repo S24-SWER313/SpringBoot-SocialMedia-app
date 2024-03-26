@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.project.proo.usreInfo.User;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Entity
@@ -17,7 +18,9 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
+
     LocalDateTime date;
+    @Size(max = 300,message = "The comment is too long")
     String commentContent;
 
     public Comment(String commentContent) {

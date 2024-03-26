@@ -3,6 +3,8 @@ package com.project.proo.postInfo;
 import lombok.Data;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.project.proo.usreInfo.User;
+
 
 @Entity
 @Data
@@ -22,9 +25,11 @@ public class Post {
 
     private Privacy audiance;
     private LocalDateTime date;
-    String caption;
+
+    @Size(max = 750,message = "The caption is too long")
+    private String caption;
     public Post(Privacy audiance, LocalDateTime date, String caption) {
-        audiance = audiance;
+      this.audiance = audiance;
         this.date = date;
         this.caption = caption;
     }

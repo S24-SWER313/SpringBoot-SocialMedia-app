@@ -131,6 +131,7 @@ public EntityModel<CommentLike> getCommentLike(@PathVariable Integer postId, @Pa
     return clikeAssembler.toModel(commentLike);
 }
 
+
 @GetMapping("/likes/{likeId}")
 public EntityModel<PostLike> getPostLike(@PathVariable Integer postId, @PathVariable Integer likeId) {
     Post post = PostRepository.findById(postId)
@@ -143,6 +144,43 @@ public EntityModel<PostLike> getPostLike(@PathVariable Integer postId, @PathVari
 
     return plikeAssembler.toModel(postLike);
 }
+
+///////////////////neeed to be checked///////////////////////////////////////
+@DeleteMapping("/comments/{commentId}/likes/{likeId}")
+public ResponseEntity<?> deleteCommentLike(@PathVariable Integer postId, @PathVariable Integer commentId, @PathVariable Integer likeId) {
+    Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new CommentNotFoundException(commentId));
+    Post post = PostRepository.findById(postId)
+            .orElseThrow(() -> new PostNotFoundException(postId));
+    comment.setPost(post);
+
+    CommentLike commentLike = comment.getLikes().stream()
+            .filter(like -> like.getId().equals(likeId))
+            .findFirst()
+            .orElseThrow(() -> new CommentLikeNotFoundException(likeId));
+
+    comment.getLikes().remove(commentLike);
+    commentLikeRepository.delete(commentLike);
+
+    return ResponseEntity.noContent().build();
+}
+
+@DeleteMapping("/likes/{likeId}")
+public ResponseEntity<?> deletePostLike(@PathVariable Integer postId, @PathVariable Integer likeId) {
+    Post post = PostRepository.findById(postId)
+            .orElseThrow(() -> new PostNotFoundException(postId));
+
+    PostLike postLike = post.getLikers().stream()
+            .filter(like -> like.getId().equals(likeId))
+            .findFirst()
+            .orElseThrow(() -> new PostLikeNotFoundException(likeId));
+
+    post.getLikers().remove(postLike);
+    postLikeRepository.delete(postLike);
+
+    return ResponseEntity.noContent().build();
+}
+
 
 }
 

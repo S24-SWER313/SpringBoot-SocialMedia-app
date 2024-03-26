@@ -6,6 +6,8 @@ import com.project.proo.usreInfo.User;
 import com.project.proo.usreInfo.UserNotFoundException;
 import com.project.proo.usreInfo.UserRepository;
 
+import jakarta.validation.Valid;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -53,7 +55,7 @@ public class CommentController {
     }
 
     @PostMapping("/users/{commentUserId}")
-    public ResponseEntity<?> addComment(@PathVariable Integer postId, @PathVariable Integer commentUserId,
+    public ResponseEntity<?> addComment(@PathVariable Integer postId,@Valid @PathVariable Integer commentUserId,
                                         @RequestBody Comment newComment) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException(postId));
@@ -74,7 +76,7 @@ public class CommentController {
     }
 
     @PutMapping("/{commentId}")
-    public ResponseEntity<?> editComment(@PathVariable Integer commentId, @RequestBody Comment updatedComment) {
+    public ResponseEntity<?> editComment(@PathVariable Integer commentId,@Valid @RequestBody Comment updatedComment) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
 

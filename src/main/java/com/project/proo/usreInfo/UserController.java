@@ -24,6 +24,9 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,14 +58,34 @@ public EntityModel<User> getUser(@PathVariable Integer userId) {
     return assembler.toModel(user);
 }
 
+// @GetMapping("/users")
+// public CollectionModel<EntityModel<User>> getAllUsers() {
+//     List<EntityModel<User>> users = userRepository.findAll().stream()
+//             .map(assembler::toModel)
+//             .collect(Collectors.toList());
+
+//     return CollectionModel.of(users, linkTo(methodOn(UserController.class).getAllUsers()).withSelfRel());
+// }
+
 @GetMapping("/users")
 public CollectionModel<EntityModel<User>> getAllUsers() {
     List<EntityModel<User>> users = userRepository.findAll().stream()
             .map(assembler::toModel)
             .collect(Collectors.toList());
 
-    return CollectionModel.of(users, linkTo(methodOn(UserController.class).getAllUsers()).withSelfRel());
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof UserDetails) {
+                return CollectionModel.of(users, linkTo(methodOn(UserController.class).getAllUsers()).withSelfRel());
+            }
+        }
+
+    return null;
 }
+
+
+
 
 @GetMapping("/users/{userId}/friends")
 public ResponseEntity<CollectionModel<EntityModel<User>>> getUserFriends(@PathVariable Integer userId) {
