@@ -68,14 +68,14 @@ public CollectionModel<EntityModel<PostLike>> getAllLikesForPost(@PathVariable I
 }
 
 @PostMapping("/comments/{commentId}/users/{userid}/likes")
-public ResponseEntity<?> addLikeForComment(@PathVariable Integer userid,@PathVariable Integer commentId, @RequestParam Boolean liked) {
+public ResponseEntity<?> addLikeForComment(@PathVariable Integer userid,@PathVariable Integer commentId) {
     Comment comment = commentRepository.findById(commentId)
             .orElseThrow(() -> new CommentNotFoundException(commentId));
      User user = userRepository.findById(userid)
                 .orElseThrow(() -> new UserNotFoundException(userid));
     // Create a new CommentLike
     CommentLike newCommentLike = new CommentLike();
-    newCommentLike.setLiked(liked);
+    newCommentLike.setLiked(true);
     newCommentLike.setComment(comment);
     newCommentLike.setUser(user);
 
@@ -92,14 +92,14 @@ public ResponseEntity<?> addLikeForComment(@PathVariable Integer userid,@PathVar
 }
 
 @PostMapping("/users/{userid}/likes")
-public ResponseEntity<?> addLikeForPosts(@PathVariable Integer userid,@PathVariable Integer postId, @RequestParam Boolean liked) {
+public ResponseEntity<?> addLikeForPosts(@PathVariable Integer userid,@PathVariable Integer postId) {
     Post post = PostRepository.findById(postId)
             .orElseThrow(() -> new PostNotFoundException(postId));
      User user = userRepository.findById(userid)
                 .orElseThrow(() -> new UserNotFoundException(userid));
     // Create a new CommentLike
     PostLike newPostLike = new PostLike();
-    newPostLike.setLiked(liked);
+    newPostLike.setLiked(true);
     newPostLike.setPost(post);
     newPostLike.setUser(user);
 

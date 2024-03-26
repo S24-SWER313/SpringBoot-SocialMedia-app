@@ -22,16 +22,27 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+   // private List<Post> sharedPosts;
+   
+   @OneToMany(mappedBy = "originalPost", cascade = CascadeType.ALL)
+   @JsonIgnore
+   private List<Post> sharedPosts;
+
+   @ManyToOne
+   @JoinColumn(name = "original_post_id")
+   @JsonIgnore
+   private Post originalPost;
 
     private Privacy audiance;
     private LocalDateTime date;
-
+    private boolean isShared;
     @Size(max = 750,message = "The caption is too long")
     private String caption;
     public Post(Privacy audiance, LocalDateTime date, String caption) {
       this.audiance = audiance;
         this.date = date;
         this.caption = caption;
+        this.isShared = false;
     }
 
 
@@ -44,7 +55,7 @@ public class Post {
     private List <imagevideo> imageVideo;
     
    // boolean isShared=false;
-    @ManyToOne(optional = false,cascade = CascadeType.ALL)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "user_id")
    @JsonIgnore
     private User user;
