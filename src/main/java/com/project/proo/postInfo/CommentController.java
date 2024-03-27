@@ -1,7 +1,5 @@
 package com.project.proo.postInfo;
 
-import org.springframework.web.bind.annotation.RestController;
-
 import com.project.proo.usreInfo.User;
 import com.project.proo.usreInfo.UserNotFoundException;
 import com.project.proo.usreInfo.UserRepository;
@@ -55,7 +53,7 @@ public class CommentController {
     }
 
     @PostMapping("/users/{commentUserId}")
-    public ResponseEntity<?> addComment(@PathVariable Integer postId,@Valid @PathVariable Integer commentUserId,
+    public ResponseEntity<?> addComment(@PathVariable("postId") Integer postId,@Valid @PathVariable("commentUserId")  Integer commentUserId,
                                         @RequestBody Comment newComment) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException(postId));

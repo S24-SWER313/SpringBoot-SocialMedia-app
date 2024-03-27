@@ -103,16 +103,16 @@ public ResponseEntity<CollectionModel<EntityModel<User>>> getUserFriends(@PathVa
 }
 
 
-@PostMapping("/users")
+// @PostMapping("/users")
 
-    ResponseEntity<?> newUser(@RequestBody User newUser) {
+//     ResponseEntity<?> newUser(@RequestBody User newUser) {
 
-		EntityModel<User> entityModel = assembler.toModel(userRepository.save(newUser));
+// 		EntityModel<User> entityModel = assembler.toModel(userRepository.save(newUser));
 
-		return ResponseEntity //
-				.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
-				.body(entityModel);
-	}
+// 		return ResponseEntity //
+// 				.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
+// 				.body(entityModel);
+// 	}
 
 
 
@@ -128,9 +128,12 @@ public ResponseEntity<?> addFriendsToUser(@PathVariable Integer userId, @Request
         user.getFriends().add(friend);
         friend.getFriends().add(user);
 }
-    userRepository.save(user);
-
-    return ResponseEntity.ok().build();
+   // userRepository.save(user);
+    EntityModel<User> entityModel = assembler.toModel(userRepository.save(user));
+    return ResponseEntity //
+     				.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
+     				.body(entityModel);
+   // return ResponseEntity.ok().build();
 }
 
 /////need to be checked 
@@ -154,6 +157,25 @@ public ResponseEntity<?> updateUser(@PathVariable Integer userId, @RequestBody U
     return ResponseEntity.ok(entityModel);
 }
 
+@DeleteMapping("/users/{userId}/friends/{friendId}")
+public ResponseEntity<?> deleteFriendship(@PathVariable Integer userId, @PathVariable Integer friendId) {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException(userId));
+
+    User friend = userRepository.findById(friendId)
+            .orElseThrow(() -> new UserNotFoundException(friendId));
+
+    if (user.getFriends().contains(friend)) {
+        user.getFriends().remove(friend);
+        friend.getFriends().remove(user);
+        userRepository.save(user);
+        userRepository.save(friend);
+        return ResponseEntity.noContent().build();
+    } else {
+        // Friendship not found, return an error response
+        return ResponseEntity.notFound().build();
+    }
+}
 
 
 

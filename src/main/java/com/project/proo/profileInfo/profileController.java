@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/users/{userId}")
 public class profileController {
 
     private final ProfileRepository profileRepository;
@@ -26,29 +27,27 @@ public class profileController {
         this.userRepository = userRepository;
     }
 
-    @GetMapping("/users/{userId}/profiles")
-    public ResponseEntity<?> getProfile(@PathVariable Integer userId) {
-        // Retrieve the user's profile by user ID
+    @GetMapping("/profiles/{profileId}")
+    public ResponseEntity<?> getProfile(@PathVariable Integer profileId, @PathVariable Integer userId) {
         Profile profile = profileRepository.findByUserId(userId)
-                .orElseThrow(() -> new ProfileNotFoundException(userId));
+        .orElseThrow(() -> new ProfileNotFoundException(userId));
 
         EntityModel<Profile> entityModel = assembler.toModel(profile);
 
         return ResponseEntity.ok(entityModel);
     }
+    
 
-    @PutMapping("/users/{userId}/profiles")
-    public ResponseEntity<?> updateProfile(@PathVariable Integer userId,@Valid @RequestBody Profile updatedProfile) {
-        Profile profile = profileRepository.findByUserId(userId)
-                .orElseThrow(() -> new ProfileNotFoundException(userId));
+    @PutMapping("/profiles/{profileId}")
+    public ResponseEntity<?> updateProfile(@PathVariable Integer profileId, @Valid @RequestBody Profile updatedProfile) {
+        Profile profile = profileRepository.findById(profileId)
+                .orElseThrow(() -> new ProfileNotFoundException(profileId));
 
         profile.setBio(updatedProfile.getBio());
         profile.setDob(updatedProfile.getDob());
         profile.setCity(updatedProfile.getCity());
         profile.setGender(updatedProfile.getGender());
         profile.setAge(updatedProfile.getAge());
-
-
 
         Profile savedProfile = profileRepository.save(profile);
 
@@ -57,8 +56,8 @@ public class profileController {
         return ResponseEntity.ok(entityModel);
     }
 
-    @PostMapping("/users/{userId}/profiles")
-    public ResponseEntity<?> addProfile(@PathVariable Integer userId,@Valid @RequestBody Profile newProfile) {
+    @PostMapping("/profiles")
+    public ResponseEntity<?> addProfile(@PathVariable Integer userId, @Valid @RequestBody Profile newProfile) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 

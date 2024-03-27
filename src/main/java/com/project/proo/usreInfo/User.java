@@ -51,13 +51,13 @@ public class User {
    @JsonIgnore
     private Profile profile;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user")
     @JsonIgnore
     private List<Post> posts;
  
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
-    @JsonIgnore
-    private List<Post> sharedPosts;
+    // @OneToMany(mappedBy = "user")
+    // @JsonIgnore
+    // private List<Post> sharedPosts;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnore
