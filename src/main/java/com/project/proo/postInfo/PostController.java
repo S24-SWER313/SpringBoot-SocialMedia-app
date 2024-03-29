@@ -139,6 +139,8 @@ public ResponseEntity<?> addsharePost(@PathVariable Integer userid, @RequestPara
     Post sharedPost = new Post(originalPost.getAudiance(), originalPost.getDate(), originalPost.getCaption());
     sharedPost.setUser(sharingUser);
     sharedPost.setOriginalPost(originalPost);
+    originalPost.getSharedPosts().add(sharedPost);
+
     sharedPost.setShared(true);
 
     
