@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import org.apache.el.stream.Optional;
@@ -27,6 +29,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,6 +45,7 @@ public class UserController {
      
   private final UserRepository userRepository;
   private final UserModelAssembler assembler;
+   BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
 
 public UserController(UserRepository userRepository, UserModelAssembler assembler) {
@@ -138,13 +143,14 @@ public ResponseEntity<?> addFriendsToUser(@PathVariable Integer userId, @Request
 
 /////need to be checked 
 @PutMapping("/users/{userId}")
-public ResponseEntity<?> updateUser(@PathVariable Integer userId, @RequestBody User updatedUser) {
+public ResponseEntity<?> updateUser(@PathVariable Integer userId, @Valid @RequestBody User updatedUser) {
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException(userId));
 
     // Update user information
     user.setUsername(updatedUser.getUsername());
-    user.setPassword(updatedUser.getPassword());
+    String encodedPassword = encoder.encode(updatedUser.getPassword());
+    user.setPassword(encodedPassword);
     user.setEmail(updatedUser.getEmail());
 
     // Save the updated user
