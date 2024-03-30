@@ -50,7 +50,7 @@ class commentTest {
 
     @Test
     void testGetComment() throws Exception {
-        int postId = 17;
+        int postId = 1;
         int commentId = 1;
         Comment comment = new Comment();
         comment.setId(commentId);
@@ -66,7 +66,7 @@ class commentTest {
 
     @Test
     void testGetCommentsByPost() throws Exception {
-        int postId = 17;
+        int postId = 1;
 
         mockMvc.perform(get("/posts/{postId}/comments", postId)
         .header("Authorization", "Bearer " + profileTest.token))
@@ -75,7 +75,7 @@ class commentTest {
 
     @Test
     void testAddComment() throws Exception {
-        int postId = 17;
+        int postId = 1;
         int userId = 1;
         Comment newComment = new Comment();
         newComment.setCommentContent("New Comment");
