@@ -19,6 +19,7 @@ The system includes comprehensive unit and integration tests for robust function
 ## Getting Started 🛫
 Prerequisites: Ensure you have [ Java, Spring Boot ..].
 Installation: Clone the repository.
+Testing: For testing by postman visit this link >>  https://app.getpostman.com/join-team?invite_code=0ce4324ee62fecf8ace682479933ea72&target_code=fb5dd7d905abca03055d6e30c71fc92b
 
 
 ## Technologies Used
