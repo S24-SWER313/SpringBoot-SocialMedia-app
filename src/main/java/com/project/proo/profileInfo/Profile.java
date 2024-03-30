@@ -6,6 +6,7 @@ import java.time.Period;
 import com.project.proo.usreInfo.User;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
@@ -33,7 +34,7 @@ public class Profile {
     @NotNull(message = "Gender must not be null")
     private Gender gender;
 
-    @Size(min = 18)
+    @Min(value = 18) 
     @NotNull(message = "Age must not be null")
     private Integer age;
     

@@ -1,6 +1,10 @@
 package com.project.proo.usreInfo;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -25,9 +29,19 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    // @NotBlank
+    // @Size(min = 3, max = 20,message = "The Size of username mustbe between 3 and 20")
     private String username;
-    private String password;
-    private String email;
+    
+//     @Size(min = 6, max = 40, message = "The size must be between 6 and 40!")
+//   @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{6,40}$",
+//           message = "Password must contain at least one digit, one lowercase letter, one uppercase letter, one special character, and be 6-40 characters long!")
+  private String password;
+
+//   @NotBlank
+//   @Size(max = 50)
+//   @Email
+  private String email;
 
     public User(){}
 
@@ -51,13 +65,13 @@ public class User {
     @JsonIgnore
     private Profile profile;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user")
     @JsonIgnore
     private List<Post> posts;
  
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
-    @JsonIgnore
-    private List<Post> sharedPosts;
+    // @OneToMany(mappedBy = "user")
+    // @JsonIgnore
+    // private List<Post> sharedPosts;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnore

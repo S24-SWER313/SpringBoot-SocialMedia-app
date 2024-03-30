@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import org.apache.el.stream.Optional;
@@ -27,6 +29,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,6 +45,7 @@ public class UserController {
      
   private final UserRepository userRepository;
   private final UserModelAssembler assembler;
+   BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
 
 public UserController(UserRepository userRepository, UserModelAssembler assembler) {
@@ -103,16 +108,16 @@ public ResponseEntity<CollectionModel<EntityModel<User>>> getUserFriends(@PathVa
 }
 
 
-@PostMapping("/users")
+// @PostMapping("/users")
 
-    ResponseEntity<?> newUser(@RequestBody User newUser) {
+//     ResponseEntity<?> newUser(@RequestBody User newUser) {
 
-		EntityModel<User> entityModel = assembler.toModel(userRepository.save(newUser));
+// 		EntityModel<User> entityModel = assembler.toModel(userRepository.save(newUser));
 
-		return ResponseEntity //
-				.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
-				.body(entityModel);
-	}
+// 		return ResponseEntity //
+// 				.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
+// 				.body(entityModel);
+// 	}
 
 
 
@@ -128,20 +133,24 @@ public ResponseEntity<?> addFriendsToUser(@PathVariable Integer userId, @Request
         user.getFriends().add(friend);
         friend.getFriends().add(user);
 }
-    userRepository.save(user);
-
-    return ResponseEntity.ok().build();
+   // userRepository.save(user);
+    EntityModel<User> entityModel = assembler.toModel(userRepository.save(user));
+    return ResponseEntity //
+     				.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
+     				.body(entityModel);
+   // return ResponseEntity.ok().build();
 }
 
 /////need to be checked 
 @PutMapping("/users/{userId}")
-public ResponseEntity<?> updateUser(@PathVariable Integer userId, @RequestBody User updatedUser) {
+public ResponseEntity<?> updateUser(@PathVariable Integer userId, @Valid @RequestBody User updatedUser) {
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException(userId));
 
     // Update user information
     user.setUsername(updatedUser.getUsername());
-    user.setPassword(updatedUser.getPassword());
+    String encodedPassword = encoder.encode(updatedUser.getPassword());
+    user.setPassword(encodedPassword);
     user.setEmail(updatedUser.getEmail());
 
     // Save the updated user
@@ -154,6 +163,25 @@ public ResponseEntity<?> updateUser(@PathVariable Integer userId, @RequestBody U
     return ResponseEntity.ok(entityModel);
 }
 
+@DeleteMapping("/users/{userId}/friends/{friendId}")
+public ResponseEntity<?> deleteFriendship(@PathVariable Integer userId, @PathVariable Integer friendId) {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException(userId));
+
+    User friend = userRepository.findById(friendId)
+            .orElseThrow(() -> new UserNotFoundException(friendId));
+
+    if (user.getFriends().contains(friend)) {
+        user.getFriends().remove(friend);
+        friend.getFriends().remove(user);
+        userRepository.save(user);
+        userRepository.save(friend);
+        return ResponseEntity.noContent().build();
+    } else {
+        // Friendship not found, return an error response
+        return ResponseEntity.notFound().build();
+    }
+}
 
 
 
