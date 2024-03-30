@@ -53,8 +53,8 @@ class likeTest {
 
     @Test
     void testGetAllLikesForComment() throws Exception {
-        int postId = 17;
-        int commentId = 3;
+        int postId = 1;
+        int commentId = 1;
 
         mockMvc.perform(get("/posts/{postId}/comments/{commentId}/likes", postId, commentId)
         .header("Authorization", "Bearer " + profileTest.token))
@@ -63,7 +63,7 @@ class likeTest {
 
     @Test
     void testGetAllLikesForPost() throws Exception {
-        int postId = 17;
+        int postId = 1;
 
         mockMvc.perform(get("/posts/{postId}/likes", postId)
         .header("Authorization", "Bearer " + profileTest.token))
@@ -73,7 +73,7 @@ class likeTest {
     @Test
     void testAddLikeForComment() throws Exception {
         int userId = 1;
-        int commentId = 3;
+        int commentId = 1;
 
         CommentLike newCommentLike = new CommentLike();
 
@@ -91,7 +91,7 @@ class likeTest {
     @Test
     void testAddLikeForPosts() throws Exception {
         int userId = 1;
-        int postId = 17;
+        int postId = 1;
 
         PostLike newPostLike = new PostLike();
 
@@ -108,9 +108,9 @@ class likeTest {
 
     @Test
     void testGetCommentLike() throws Exception {
-        int postId = 17;
-        int commentId = 3;
-        int likeId = 5;
+        int postId = 1;
+        int commentId = 1;
+        int likeId = 2;
         int userId = 1;
    
 
@@ -134,8 +134,8 @@ class likeTest {
 
     @Test
     void testGetPostLike() throws Exception {
-        int postId = 17;
-        int likeId = 6;
+        int postId = 1;
+        int likeId = 1;
         int userId = 1;
       
 
@@ -158,9 +158,9 @@ class likeTest {
 
    // @Test //test this after adding the comment dont test it with all of the tests :)
     void testDeleteCommentLike() throws Exception {
-        int postId = 17;
-        int commentId = 3;
-        int likeId = 5;
+        int postId = 1;
+        int commentId = 1;
+        int likeId = 2;
 
         mockMvc.perform(delete("/posts/{postId}/comments/{commentId}/likes/{likeId}", postId, commentId, likeId)
         .header("Authorization", "Bearer " + profileTest.token))
@@ -169,8 +169,8 @@ class likeTest {
 
    // @Test //test this after adding the comment dont test it with all of the tests :)
     void testDeletePostLike() throws Exception {
-        int postId = 17;
-        int likeId = 8;
+        int postId = 1;
+        int likeId = 1;
 
         mockMvc.perform(delete("/posts/{postId}/likes/{likeId}", postId, likeId)
         .header("Authorization", "Bearer " + profileTest.token))

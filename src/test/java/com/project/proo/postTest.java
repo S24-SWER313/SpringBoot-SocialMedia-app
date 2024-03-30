@@ -62,7 +62,7 @@ class postTest {
     @Test
     void testGetPosts() throws Exception {
         int userId = 1;
-        int postId = 17;
+        int postId = 1;
         Post post = new Post();
         post.setId(postId);
         // post.setCaption("Test Caption");
@@ -103,7 +103,7 @@ class postTest {
 
     @Test
     void testEditPost() throws Exception {
-        int postId = 17;
+        int postId = 1;
         Post updatedPost = new Post();
         updatedPost.setCaption("Updated Caption");
         updatedPost.setDate(LocalDateTime.now());
@@ -124,7 +124,7 @@ class postTest {
      // @Test////test the methode after adding a post dont test it with all the tests :)
      void testDeletePost() throws Exception {
         int userId = 1;
-        int postId = 25;
+        int postId = 2;
 
         mockMvc.perform(delete("/users/{userId}/posts/{postId}", userId, postId)
                 .header("Authorization", "Bearer " + profileTest.token))
@@ -137,7 +137,7 @@ class postTest {
     @Test
     void testAddSharePost() throws Exception {
         int userId = 2;
-        int postId = 17;
+        int postId = 1;
         User user = new User();
         user.setId(userId);
         Post originalPost = new Post();
@@ -158,7 +158,7 @@ class postTest {
     @Test
     void testGetPost() throws Exception {
         int userId = 1;
-        int postId = 17;
+        int postId = 1;
         User user = new User();
         user.setId(userId);
         Post post = new Post();
@@ -177,7 +177,7 @@ class postTest {
     @Test
     void testGetSharedPosts() throws Exception {
         int userId = 2;
-        int postId = 23;
+        int postId = 1;
         User user = new User();
         user.setId(userId);
         Post originalPost = new Post();
@@ -206,8 +206,8 @@ class postTest {
 
     //@Test // test it after sharing the post dont test it with all the test :)
     void testUnsharePost() throws Exception {
-        int userId = 1;
-      int sharedPostId=34;
+        int userId = 2;
+        int sharedPostId=1;
         User user = new User();
         user.setId(userId);
         Post sharedPost = new Post();

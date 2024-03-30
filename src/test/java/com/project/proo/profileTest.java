@@ -57,7 +57,7 @@ class profileTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public final static String  token="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJleGFtcGxlX3VzZXIiLCJpYXQiOjE3MTE3MDUxMzQsImV4cCI6MTcxMTc5MTUzNH0.jsdDy0lOQsa0vpF-4bvyAL6nvxRuuWFzQqQtZjrytnc";
+    public final static String  token="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJaYWluYWIiLCJpYXQiOjE3MTE3OTkwNjEsImV4cCI6MTcxMTg4NTQ2MX0.fK6OygOZ6z5nl4gJQxbxYHdFqCGOWtq6qkmhrtO0jZI";
 
     @Test
     void testGetAddProfile() throws Exception {
