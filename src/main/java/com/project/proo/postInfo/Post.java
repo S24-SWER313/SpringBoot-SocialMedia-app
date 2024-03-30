@@ -28,6 +28,7 @@ public class Post {
 
     @Size(max = 750,message = "The caption is too long")
     private String caption;
+
     public Post(Privacy audiance, LocalDateTime date, String caption) {
       this.audiance = audiance;
         this.date = date;
@@ -38,15 +39,16 @@ public class Post {
     public Post() {
     }
     
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-   // @JsonManagedReference
     @JsonIgnore
-    private List <imagevideo> imageVideo;
-    
+    private List <MyFile> files;
+
+
    // boolean isShared=false;
     @ManyToOne(optional = false,cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
-   @JsonIgnore
+    @JsonIgnore
     private User user;
 
  
@@ -72,16 +74,5 @@ public class Post {
     }
 
     
-//     public void sharePost(User user) {
-//         if (user != null) {
-//             // Create a new shared post
-//             Post sharedPost = new Post();
-//             sharedPost.setDate(LocalDateTime.now());
-//             sharedPost.setUser(user);
-//             sharedPost.setLikers(new ArrayList<>()); 
-//             user.getSharedPosts().add(sharedPost);
-//         }
-
-// }
 
 }

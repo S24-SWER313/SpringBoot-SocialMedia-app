@@ -42,6 +42,7 @@ public class PostController {
   private final PostModelAssembler assembler;
   private final UserRepository UserRepository;
   private final UserModelAssembler UserModelAssembler;
+  
 public PostController(PostRepository postRepository,PostModelAssembler assembler,UserRepository UserRepository,UserModelAssembler UserModelAssembler) {
     this.postRepository = postRepository;
       this.assembler=assembler;
