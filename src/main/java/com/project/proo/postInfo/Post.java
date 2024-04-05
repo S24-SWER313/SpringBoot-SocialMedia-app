@@ -7,11 +7,14 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.project.proo.Hashtagee.Hashtag;
 import com.project.proo.usreInfo.User;
 
 
@@ -74,6 +77,12 @@ public class Post {
     private List<Comment> comments = new ArrayList<>();
 
     
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JsonIgnore
+    @JoinTable(name = "post_hashtags",
+               joinColumns = @JoinColumn(name = "post_id"),
+               inverseJoinColumns = @JoinColumn(name = "hashtag_id"))
+    private Set<Hashtag> hashtags = new HashSet<>();
  
     public void addComment(User user, String commentContent) {
         Comment comment = new Comment();
