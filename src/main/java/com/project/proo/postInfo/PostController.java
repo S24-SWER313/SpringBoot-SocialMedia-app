@@ -9,22 +9,34 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.project.proo.Hashtagee.Hashtag;
+import com.project.proo.Hashtagee.HashtagController;
+import com.project.proo.Hashtagee.HashtagRepository;
 import com.project.proo.usreInfo.User;
 import com.project.proo.usreInfo.UserModelAssembler;
 import com.project.proo.usreInfo.UserNotFoundException;
 import com.project.proo.usreInfo.UserRepository;
 
 import java.net.URI;
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.Link;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,11 +55,14 @@ public class PostController {
   private final UserRepository UserRepository;
   private final UserModelAssembler UserModelAssembler;
   
-public PostController(PostRepository postRepository,PostModelAssembler assembler,UserRepository UserRepository,UserModelAssembler UserModelAssembler) {
+    private final HashtagRepository hashtagRepository;
+  
+public PostController(PostRepository postRepository,PostModelAssembler assembler,UserRepository UserRepository,UserModelAssembler UserModelAssembler,  HashtagRepository hashtagRepository) {
     this.postRepository = postRepository;
       this.assembler=assembler;
       this.UserRepository=UserRepository;
       this.UserModelAssembler=UserModelAssembler;
+    this.hashtagRepository = hashtagRepository;
 }
 
 @GetMapping("/posts/{postid}")
@@ -83,11 +98,53 @@ public CollectionModel<EntityModel<Post>> all(@PathVariable("userid") Integer us
             
         Post savedPost = postRepository.save(newPost);
         EntityModel<Post> entityModel = assembler.toModel(savedPost);
+
+      String content=  newPost.getCaption();
+      Set<String> hashtagsInContent = extractHashtagsFromContent(content);
+
+//       for (String hashtagName : hashtagsInContent) {
+//           Hashtag hashtag = new Hashtag();
+//           hashtag.setName(hashtagName);
+// hashtag.getPosts().add(savedPost);
+//           hashtagRepository.save(hashtag);
+//       }
+for (String hashtagName : hashtagsInContent) {
+    Optional<Hashtag> existingHashtagOptional = hashtagRepository.findByName(hashtagName);
+    if (existingHashtagOptional.isPresent()) {
+        Hashtag existingHashtag = existingHashtagOptional.get();
+        existingHashtag.getPosts().add(newPost);
+        hashtagRepository.save(existingHashtag);
+        newPost.getHashtags().add(existingHashtag);
+        postRepository.save(newPost);
+        System.out.println(existingHashtag.getName());
+    } else {
+        Hashtag newHashtag = new Hashtag();
+        newHashtag.setName(hashtagName);
+        newHashtag.getPosts().add(newPost);
+        hashtagRepository.save(newHashtag);
+        newPost.getHashtags().add(newHashtag);
+        postRepository.save(newPost);
+        System.out.println(newHashtag.getName());
+        
+    }
+}
     
+      
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entityModel);
     }
+
+    private Set<String> extractHashtagsFromContent(String content) {
+        Set<String> hashtags = new HashSet<>();
+        Pattern pattern = Pattern.compile("#(\\w+)");
+        Matcher matcher = pattern.matcher(content);
+        while (matcher.find()) {
+            hashtags.add(matcher.group(1));
+        }
+        return hashtags;
+
+}
 
 
 @PutMapping("/posts/{postId}") // Specify the postId in the mapping
@@ -200,6 +257,13 @@ public ResponseEntity<?> unsharePost(@PathVariable("userid") Integer userId, @Pa
     return ResponseEntity.noContent().build();
 }
 
-    
 
+
+
+
+            
 }
+
+
+
+
