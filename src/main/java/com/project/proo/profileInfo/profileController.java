@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/users/{userId}")
 public class profileController {
 
