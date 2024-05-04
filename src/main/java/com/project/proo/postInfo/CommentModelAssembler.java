@@ -6,6 +6,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
+import com.project.proo.usreInfo.UserController;
+
 @Component
 public class CommentModelAssembler implements RepresentationModelAssembler<Comment, EntityModel<Comment>> {
 
@@ -15,8 +17,10 @@ public class CommentModelAssembler implements RepresentationModelAssembler<Comme
                 // Link to Comment
                 linkTo(methodOn(CommentController.class).getComment(comment.getPost().getId(),comment.getId())).withSelfRel(),
                 // Link to related Post
-                linkTo(methodOn(PostController.class).one(comment.getPost().getUser().getId(),comment.getPost().getId())).withRel("posts")
-              
+                linkTo(methodOn(PostController.class).one(comment.getPost().getUser().getId(),comment.getPost().getId())).withRel("posts"),
+                 linkTo(methodOn(UserController.class).getUser(comment.getUser().getId())).withRel("user"),
+
+                 linkTo(methodOn(LikeController.class).getAllLikesForComment(comment.getPost().getId(),comment.getId())).withRel("likes")
         );
     }
 }
