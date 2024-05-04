@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/posts/{postId}")
 public class LikeController {
     @Autowired
