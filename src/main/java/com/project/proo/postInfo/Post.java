@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -41,12 +43,29 @@ public class Post {
     private boolean isShared;
     @Size(max = 750,message = "The caption is too long")
     private String caption;
+     @Transient // This annotation ensures that the field is not persisted to the database
+    private MultipartFile image; // MultipartFile field to handle image upload
+
+    private String imageUrl;
+
+    @Transient
+    private MultipartFile video; // Field to handle video uploads
+
+    private String videoUrl; 
 
     public Post(Privacy audiance, LocalDateTime date, String caption) {
       this.audiance = audiance;
         this.date = date;
         this.caption = caption;
         this.isShared = false;
+    }
+
+    public Post(@Size(max = 750, message = "The caption is too long") String caption,Privacy audiance, String imageUrl, String videoUrl) {
+        this.caption = caption;
+        this.imageUrl = imageUrl;
+        this.videoUrl = videoUrl;
+        this.date = LocalDateTime.now();
+        this.audiance = audiance;
     }
 
 
