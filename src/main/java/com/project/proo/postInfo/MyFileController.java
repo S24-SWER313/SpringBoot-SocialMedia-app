@@ -46,15 +46,11 @@ public class MyFileController {
             MyFile myFile = new MyFile();
             myFile.setPost(post);
             myFile.setType(file.getContentType());
-            myFile.setSize(file.getBytes());  // Saving file data
             myFile.setName(file.getOriginalFilename());
-    
-            // Calculate file size in kilobytes
-            long fileSizeKB = file.getSize() / 1024; // Convert bytes to kilobytes
     
             MyFile savedFile = fileRepository.save(myFile);
     
-            message = "Uploaded the file successfully: " + file.getOriginalFilename() + ", Size: " + fileSizeKB + " KB";
+            message = "Uploaded the file successfully: " + file.getOriginalFilename();
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
         } catch (Exception e) {
             message = "Could not upload the file: " + file.getOriginalFilename() + ". Error: " + e.getMessage();
@@ -71,6 +67,7 @@ public class MyFileController {
         return fileModelAssembler.toModel(file);
     }
 
+   
     // @GetMapping("/files")
     // public CollectionModel<EntityModel<MyFile>> getAllFilesForPost(@PathVariable Integer postId) {
     //     List<MyFile> filesForPost = fileRepository.findByPostId(postId);

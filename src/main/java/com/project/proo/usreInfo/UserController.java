@@ -184,6 +184,25 @@ public ResponseEntity<?> deleteFriendship(@PathVariable Integer userId, @PathVar
         return ResponseEntity.notFound().build();
     }
 }
+@GetMapping("/users/{userId}/recommended-friends")
+    public ResponseEntity<CollectionModel<EntityModel<User>>> getRecommendedFriends(@PathVariable Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        // Get all users who are not already friends with the user
+        List<User> recommendedFriends = userRepository.findAll().stream()
+                .filter(u -> !user.getFriends().contains(u) && !u.equals(user))
+                .collect(Collectors.toList());
+
+        List<EntityModel<User>> recommendedFriendsModels = recommendedFriends.stream()
+                .map(assembler::toModel)
+                .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<User>> collectionModel = CollectionModel.of(recommendedFriendsModels,
+                linkTo(methodOn(UserController.class).getRecommendedFriends(userId)).withSelfRel());
+
+        return ResponseEntity.ok(collectionModel);
+    }
 
 
 
