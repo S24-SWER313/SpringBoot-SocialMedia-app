@@ -21,6 +21,7 @@ import com.project.proo.usreInfo.UserRepository;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -430,7 +431,27 @@ public ResponseEntity<?> getFriendsPosts(@PathVariable("userid") Integer userId)
 }
 
 
+@GetMapping("/search")
+public ResponseEntity<CollectionModel<EntityModel<Object>>> search(@RequestParam("query") String query) {
+    List<EntityModel<Object>> combinedResults = new ArrayList<>();
 
+    // Add posts to the combined results
+    List<EntityModel<Post>> postResults = postRepository.findByCaptionContainingIgnoreCase(query).stream()
+        .map(assembler::toModel)
+        .collect(Collectors.toList());
+    combinedResults.addAll(postResults.stream().map(p -> EntityModel.of((Object) p.getContent(), p.getLinks())).collect(Collectors.toList()));
+
+    // Add users to the combined results
+    List<EntityModel<User>> userResults = UserRepository.findByUsernameContainingIgnoreCase(query).stream()
+        .map(UserModelAssembler::toModel)
+        .collect(Collectors.toList());
+    combinedResults.addAll(userResults.stream().map(u -> EntityModel.of((Object) u.getContent(), u.getLinks())).collect(Collectors.toList()));
+
+    CollectionModel<EntityModel<Object>> collectionModel = CollectionModel.of(combinedResults,
+        linkTo(methodOn(PostController.class).search(query)).withSelfRel());
+
+    return ResponseEntity.ok(collectionModel);
+}
 
 
 
