@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.cloudinary.Cloudinary;
 import com.project.proo.Hashtagee.Hashtag;
 import com.project.proo.Hashtagee.HashtagController;
 import com.project.proo.Hashtagee.HashtagRepository;
@@ -18,6 +20,8 @@ import com.project.proo.usreInfo.UserNotFoundException;
 import com.project.proo.usreInfo.UserRepository;
 
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -27,11 +31,19 @@ import java.util.regex.Pattern;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Map;
 
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -58,6 +70,9 @@ public class PostController {
   private final UserModelAssembler UserModelAssembler;
   
     private final HashtagRepository hashtagRepository;
+
+     @Autowired
+    private Cloudinary cloudinary;
   
 public PostController(PostRepository postRepository,PostModelAssembler assembler,UserRepository UserRepository,UserModelAssembler UserModelAssembler,  HashtagRepository hashtagRepository) {
     this.postRepository = postRepository;
@@ -91,51 +106,46 @@ public CollectionModel<EntityModel<Post>> all(@PathVariable("userid") Integer us
 
 
 
-@PostMapping("/posts")
-   public ResponseEntity<?> addPosts(@PathVariable Integer userid,@Valid @RequestBody Post newPost) {
-        User user = UserRepository.findById(userid)
-                .orElseThrow(() -> new UserNotFoundException(userid));
+// @PostMapping("/posts")
+//    public ResponseEntity<?> addPosts(@PathVariable Integer userid,@Valid @RequestBody Post newPost) {
+//         User user = UserRepository.findById(userid)
+//                 .orElseThrow(() -> new UserNotFoundException(userid));
     
-                newPost.setUser(user);
+//                 newPost.setUser(user);
             
-        Post savedPost = postRepository.save(newPost);
-        EntityModel<Post> entityModel = assembler.toModel(savedPost);
+//         Post savedPost = postRepository.save(newPost);
+//         EntityModel<Post> entityModel = assembler.toModel(savedPost);
 
-      String content=  newPost.getCaption();
-      Set<String> hashtagsInContent = extractHashtagsFromContent(content);
+//       String content=  newPost.getCaption();
+//       Set<String> hashtagsInContent = extractHashtagsFromContent(content);
 
-//       for (String hashtagName : hashtagsInContent) {
-//           Hashtag hashtag = new Hashtag();
-//           hashtag.setName(hashtagName);
-// hashtag.getPosts().add(savedPost);
-//           hashtagRepository.save(hashtag);
-//       }
-for (String hashtagName : hashtagsInContent) {
-    Optional<Hashtag> existingHashtagOptional = hashtagRepository.findByName(hashtagName);
-    if (existingHashtagOptional.isPresent()) {
-        Hashtag existingHashtag = existingHashtagOptional.get();
-        existingHashtag.getPosts().add(newPost);
-        hashtagRepository.save(existingHashtag);
-        newPost.getHashtags().add(existingHashtag);
-        postRepository.save(newPost);
-        System.out.println(existingHashtag.getName());
-    } else {
-        Hashtag newHashtag = new Hashtag();
-        newHashtag.setName(hashtagName);
-        newHashtag.getPosts().add(newPost);
-        hashtagRepository.save(newHashtag);
-        newPost.getHashtags().add(newHashtag);
-        postRepository.save(newPost);
-        System.out.println(newHashtag.getName());
+
+// for (String hashtagName : hashtagsInContent) {
+//     Optional<Hashtag> existingHashtagOptional = hashtagRepository.findByName(hashtagName);
+//     if (existingHashtagOptional.isPresent()) {
+//         Hashtag existingHashtag = existingHashtagOptional.get();
+//         existingHashtag.getPosts().add(newPost);
+//         hashtagRepository.save(existingHashtag);
+//         newPost.getHashtags().add(existingHashtag);
+//         postRepository.save(newPost);
+//         System.out.println(existingHashtag.getName());
+//     } else {
+//         Hashtag newHashtag = new Hashtag();
+//         newHashtag.setName(hashtagName);
+//         newHashtag.getPosts().add(newPost);
+//         hashtagRepository.save(newHashtag);
+//         newPost.getHashtags().add(newHashtag);
+//         postRepository.save(newPost);
+//         System.out.println(newHashtag.getName());
         
-    }
-}
+//     }
+// }
     
       
-        return ResponseEntity
-                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
-                .body(entityModel);
-    }
+//         return ResponseEntity
+//                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+//                 .body(entityModel);
+//     }
 
     private Set<String> extractHashtagsFromContent(String content) {
         Set<String> hashtags = new HashSet<>();
@@ -148,20 +158,156 @@ for (String hashtagName : hashtagsInContent) {
 
 }
 
+@PostMapping("/posts")
+public ResponseEntity<?> addPosts(@PathVariable Integer userid,
+                                  @RequestParam(value="image" , required = false) MultipartFile image,
+                                  @RequestParam(value = "video", required = false) MultipartFile video,
+                                  @RequestParam("caption") String caption,@RequestParam("Audiance") Privacy audiance) {
+    User user = UserRepository.findById(userid)
+            .orElseThrow(() -> new UserNotFoundException(userid));
 
-@PutMapping("/posts/{postId}") // Specify the postId in the mapping
-public ResponseEntity<?> editPost(@PathVariable Integer postId,@Valid @RequestBody Post updatedPost) {
-    Post post = postRepository.findById(postId) // Find post by postId, not userId
+    try {
+        String imageUrl = null;
+        String videoUrl = null;
+
+        // Upload image to Cloudinary if provided
+        if (image != null && !image.isEmpty()) {
+            imageUrl = uploadToCloudinary(image, "image");
+        }
+
+        // Upload video to Cloudinary if provided
+        if (video != null && !video.isEmpty()) {
+            videoUrl = uploadToCloudinary(video, "video");
+        }
+
+        // Save post with image and/or video URLs
+        Post newPost = new Post(caption,audiance, imageUrl, videoUrl);
+        newPost.setUser(user);
+        Post savedPost = postRepository.save(newPost);
+        EntityModel<Post> entityModel = assembler.toModel(savedPost);
+
+     /////////////for hashtag//////////////////////
+        String content=  newPost.getCaption();
+        Set<String> hashtagsInContent = extractHashtagsFromContent(content);
+  
+  
+  for (String hashtagName : hashtagsInContent) {
+      Optional<Hashtag> existingHashtagOptional = hashtagRepository.findByName(hashtagName);
+      if (existingHashtagOptional.isPresent()) {
+          Hashtag existingHashtag = existingHashtagOptional.get();
+          existingHashtag.getPosts().add(newPost);
+          hashtagRepository.save(existingHashtag);
+          newPost.getHashtags().add(existingHashtag);
+          postRepository.save(newPost);
+          System.out.println(existingHashtag.getName());
+      } else {
+          Hashtag newHashtag = new Hashtag();
+          newHashtag.setName(hashtagName);
+          newHashtag.getPosts().add(newPost);
+          hashtagRepository.save(newHashtag);
+          newPost.getHashtags().add(newHashtag);
+          postRepository.save(newPost);
+          System.out.println(newHashtag.getName());
+          
+      }
+  }
+      ///////////////////////////////////////
+        
+          return ResponseEntity
+                  .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                  .body(entityModel);
+      
+
+    } catch (IOException e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading media");
+    }
+}
+
+private String uploadToCloudinary(MultipartFile file, String resourceType) throws IOException {
+    try {
+        Map uploadResult = cloudinary.uploader().upload(
+                file.getBytes(), 
+                ObjectUtils.asMap("resource_type", resourceType));
+        return (String) uploadResult.get("secure_url");
+    } catch (Exception e) {
+        // Handle Cloudinary specific upload errors here (e.getMessage())
+        throw new RuntimeException("Error uploading file to Cloudinary: " + e.getMessage());
+    }
+}
+
+
+
+
+// @PutMapping("/posts/{postId}") // Specify the postId in the mapping
+// public ResponseEntity<?> editPost(@PathVariable Integer postId,@Valid @RequestBody Post updatedPost) {
+//     Post post = postRepository.findById(postId) // Find post by postId, not userId
+//             .orElseThrow(() -> new PostNotFoundException(postId));
+
+//     post.setCaption(updatedPost.getCaption());
+//     post.setDate(updatedPost.getDate());
+//     post.setAudiance(updatedPost.getAudiance()); 
+
+//     Post savedPost = postRepository.save(post);
+//     EntityModel<Post> entityModel = assembler.toModel(savedPost);
+
+//     return ResponseEntity.ok(entityModel);
+// }
+
+@PutMapping("/posts/{postId}")
+public ResponseEntity<?> editPost(
+    @PathVariable Integer postId,
+    @RequestParam(value = "image", required = false) MultipartFile image,
+    @RequestParam(value = "video", required = false) MultipartFile video,
+    @RequestParam("caption") String caption,
+    @RequestParam("Audiance") Privacy audiance,
+    @RequestParam(value = "removeImage", required = false) boolean removeImage,
+    @RequestParam(value = "removeVideo", required = false) boolean removeVideo
+) {
+    try {
+        // Find post by postId
+        Post post = postRepository.findById(postId)
             .orElseThrow(() -> new PostNotFoundException(postId));
 
-    post.setCaption(updatedPost.getCaption());
-    post.setAudiance(updatedPost.getAudiance()); 
+        // Update post fields from the request body
+        post.setCaption(caption);
+        post.setDate(LocalDateTime.now());
+        post.setAudiance(audiance);
 
-    Post savedPost = postRepository.save(post);
-    EntityModel<Post> entityModel = assembler.toModel(savedPost);
+        // Remove image if requested
+        if (removeImage) {
+            post.setImageUrl(null); // Set image URL to null or remove it from the database
+        }
 
-    return ResponseEntity.ok(entityModel);
+        // Remove video if requested
+        if (removeVideo) {
+            post.setVideoUrl(null); // Set video URL to null or remove it from the database
+        }
+
+        // Upload image to Cloudinary if provided
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = uploadToCloudinary(image, "image");
+            post.setImageUrl(imageUrl);
+        }
+
+        // Upload video to Cloudinary if provided
+        if (video != null && !video.isEmpty()) {
+            String videoUrl = uploadToCloudinary(video, "video");
+            post.setVideoUrl(videoUrl);
+        }
+
+        // Save the updated post
+        Post savedPost = postRepository.save(post);
+        EntityModel<Post> entityModel = assembler.toModel(savedPost);
+
+        return ResponseEntity.ok(entityModel);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating post");
+    }
 }
+
+
 @DeleteMapping("/posts/{postId}")
 public ResponseEntity<?> deletePost(@PathVariable("userid") Integer userid, @PathVariable("postId") Integer postid) {
 
@@ -196,7 +342,7 @@ public ResponseEntity<?> addsharePost(@PathVariable Integer userid, @RequestPara
             .orElseThrow(() -> new PostNotFoundException(postId));
 
     // Create a new post instance for sharing
-    Post sharedPost = new Post(originalPost.getAudiance(), originalPost.getDate(), originalPost.getCaption());
+    Post sharedPost = new Post( originalPost.getCaption(),originalPost.getAudiance(),originalPost.getImageUrl(),originalPost.getVideoUrl());
     sharedPost.setUser(sharingUser);
     sharedPost.setOriginalPost(originalPost);
     originalPost.getSharedPosts().add(sharedPost);
@@ -258,7 +404,54 @@ public ResponseEntity<?> unsharePost(@PathVariable("userid") Integer userId, @Pa
     // Return a response indicating successful deletion
     return ResponseEntity.noContent().build();
 }
+@GetMapping("/friends-posts")
+public ResponseEntity<?> getFriendsPosts(@PathVariable("userid") Integer userId) {
+    // Retrieve the user from the database
+    User user = UserRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException(userId));
 
+    // Get the friends of the user
+    List<User> friends = user.getFriends();
+
+    // Retrieve all posts of the user's friends
+    List<EntityModel<Post>> friendsPosts = friends.stream()
+            .flatMap(friend -> friend.getPosts().stream())
+            .map(assembler::toModel)
+            .collect(Collectors.toList());
+
+    // If no posts are found, return a message to add friends
+    if (friendsPosts.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .body("No posts found for friends. Add some friends!");
+    }
+
+    // Return the posts as a collection
+    return ResponseEntity.ok(CollectionModel.of(friendsPosts,
+            linkTo(methodOn(PostController.class).getFriendsPosts(userId)).withSelfRel()));
+}
+
+
+@GetMapping("/search")
+public ResponseEntity<CollectionModel<EntityModel<Object>>> search(@RequestParam("query") String query) {
+    List<EntityModel<Object>> combinedResults = new ArrayList<>();
+
+    // Add posts to the combined results
+    List<EntityModel<Post>> postResults = postRepository.findByCaptionContainingIgnoreCase(query).stream()
+        .map(assembler::toModel)
+        .collect(Collectors.toList());
+    combinedResults.addAll(postResults.stream().map(p -> EntityModel.of((Object) p.getContent(), p.getLinks())).collect(Collectors.toList()));
+
+    // Add users to the combined results
+    List<EntityModel<User>> userResults = UserRepository.findByUsernameContainingIgnoreCase(query).stream()
+        .map(UserModelAssembler::toModel)
+        .collect(Collectors.toList());
+    combinedResults.addAll(userResults.stream().map(u -> EntityModel.of((Object) u.getContent(), u.getLinks())).collect(Collectors.toList()));
+
+    CollectionModel<EntityModel<Object>> collectionModel = CollectionModel.of(combinedResults,
+        linkTo(methodOn(PostController.class).search(query)).withSelfRel());
+
+    return ResponseEntity.ok(collectionModel);
+}
 
 
 
