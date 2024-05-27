@@ -29,8 +29,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // @NotBlank
-    // @Size(min = 3, max = 20,message = "The Size of username mustbe between 3 and 20")
+    @NotBlank
+    @Size(min = 3, max = 20,message = "The Size of username mustbe between 3 and 20")
     private String username;
     
 //     @Size(min = 6, max = 40, message = "The size must be between 6 and 40!")
@@ -38,9 +38,9 @@ public class User {
 //           message = "Password must contain at least one digit, one lowercase letter, one uppercase letter, one special character, and be 6-40 characters long!")
   private String password;
 
-//   @NotBlank
-//   @Size(max = 50)
-//   @Email
+  @NotBlank
+  @Size(max = 50)
+  @Email
   private String email;
 
     public User(){}
@@ -82,4 +82,3 @@ public class User {
     private List<Comment> comments;
   
 }
-

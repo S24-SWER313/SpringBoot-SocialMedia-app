@@ -7,7 +7,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface CommentLikeRepository extends JpaRepository<CommentLike, Integer> {
-
+    
+    @Transactional
     void deleteByComment_Id(Integer commentId);
 
     void deleteByIdAndComment_Id(Integer likeId, Integer commentId);

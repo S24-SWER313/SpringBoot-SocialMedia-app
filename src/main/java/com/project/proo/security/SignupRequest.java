@@ -27,7 +27,7 @@ public class SignupRequest {
 
   @Size(min = 6, max = 40, message = "The size must be between 6 and 40!")
   @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{6,40}$",
-          message = "Password must contain at least one digit, one lowercase letter, one uppercase letter, one special character, and be 6-40 characters long!")
+          message = "Password must be strong ")
   private String password;
 
   public String getUsername() {
