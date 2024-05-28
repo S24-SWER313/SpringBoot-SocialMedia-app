@@ -9,9 +9,10 @@ import com.project.proo.postInfo.Post;
 
 public interface UserRepository  extends JpaRepository<User, Integer> {
     Optional<User> findByUsername(String username);
-    
-    Boolean existsByUsername(String username);
+    Optional<User> findByEmail(String email);
 
+    Boolean existsByUsername(String username);
+    
     Boolean existsByEmail(String email);
     List<User> findByUsernameContainingIgnoreCase(String username);
 }

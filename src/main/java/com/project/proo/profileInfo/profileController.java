@@ -1,9 +1,12 @@
 package com.project.proo.profileInfo;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.project.proo.postInfo.Post;
+import com.project.proo.postInfo.PostController;
 import com.project.proo.usreInfo.User;
 import com.project.proo.usreInfo.UserNotFoundException;
 import com.project.proo.usreInfo.UserRepository;
@@ -12,7 +15,9 @@ import jakarta.validation.Valid;
 
 import java.time.LocalDate;
 import java.util.Optional;
-
+import java.util.stream.Collectors;
+import java.util.List;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 @RestController
 @CrossOrigin
 @RequestMapping("/users/{userId}")
@@ -70,5 +75,14 @@ public class profileController {
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entityModel);
+    }
+
+    @GetMapping("/profiles")
+    public CollectionModel<EntityModel<Profile>> all() {
+        List<EntityModel<Profile>> profiles = profileRepository.findAll().stream()
+                .map(assembler::toModel)
+                .collect(Collectors.toList());
+
+        return CollectionModel.of(profiles, linkTo(methodOn(profileController.class).all()).withSelfRel());
     }
 }

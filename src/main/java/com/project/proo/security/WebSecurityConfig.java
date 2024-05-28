@@ -89,9 +89,11 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth ->
             auth.requestMatchers("/api/auth/**").permitAll()
-           
+            .requestMatchers("/swagegr-ui.html").permitAll()
+            .requestMatchers("/swagegr-ui/**").permitAll()
+            .requestMatchers("/swagegr-ui.html").permitAll()
                 //.requestMatchers("/users/**").authenticated()
-                .anyRequest().authenticated());
+            .anyRequest().authenticated());
 
     http.authenticationProvider(authenticationProvider());
 
