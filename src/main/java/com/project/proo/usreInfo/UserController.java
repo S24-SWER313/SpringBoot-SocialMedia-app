@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.project.proo.postInfo.PostModelAssembler;
 import com.project.proo.postInfo.PostRepository;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
@@ -36,7 +37,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
+import java.util.HashMap;
+import java.util.Map;
 @RestController
 @CrossOrigin
 public class UserController {
@@ -135,7 +137,7 @@ public class UserController {
     }
 
     ///// need to be checked
-    @PutMapping("/users/{userId}")
+   @PutMapping("/users/{userId}")
     public ResponseEntity<?> updateUser(@PathVariable Integer userId, @Valid @RequestBody User updatedUser) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
@@ -143,19 +145,25 @@ public class UserController {
         // Check if the new username is already taken by another user
         Optional<User> existingUser = userRepository.findByUsername(updatedUser.getUsername());
         if (existingUser.isPresent() && !existingUser.get().getId().equals(userId)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exists");
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Username already exists");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
         }
 
         // Check if the new email is already taken by another user
         Optional<User> existingUserEmail = userRepository.findByEmail(updatedUser.getEmail());
         if (existingUserEmail.isPresent() && !existingUserEmail.get().getId().equals(userId)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists");
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Email already exists");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
         }
 
-        String passwordPattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{6,40}$";
-    if (!updatedUser.getPassword().matches(passwordPattern)) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password must be strong");
-    }
+        String passwordPattern = "^(?=.[0-9])(?=.[a-z])(?=.[A-Z])(?=.[@#$%^&+=!]).{6,40}$";
+        if (!updatedUser.getPassword().matches(passwordPattern)) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Password must be strong");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
 
         // Update user information
         user.setUsername(updatedUser.getUsername());
@@ -168,7 +176,6 @@ public class UserController {
         EntityModel<User> entityModel = assembler.toModel(savedUser);
         return ResponseEntity.ok(entityModel);
     }
-
     @DeleteMapping("/users/{userId}/friends/{friendId}")
     public ResponseEntity<?> deleteFriendship(@PathVariable Integer userId, @PathVariable Integer friendId) {
         User user = userRepository.findById(userId)
