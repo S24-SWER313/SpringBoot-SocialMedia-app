@@ -158,7 +158,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
         }
 
-        String passwordPattern = "^(?=.[0-9])(?=.[a-z])(?=.[A-Z])(?=.[@#$%^&+=!]).{6,40}$";
+        String passwordPattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{6,40}$";
         if (!updatedUser.getPassword().matches(passwordPattern)) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Password must be strong");
