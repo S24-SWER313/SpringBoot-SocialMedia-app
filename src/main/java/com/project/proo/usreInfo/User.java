@@ -82,4 +82,3 @@ public class User {
     private List<Comment> comments;
   
 }
-

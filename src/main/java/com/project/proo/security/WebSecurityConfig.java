@@ -22,6 +22,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 
 
+
+
 @Configuration
 @EnableMethodSecurity
 // (securedEnabled = true,
@@ -89,12 +91,23 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth ->
             auth.requestMatchers("/api/auth/**").permitAll()
+            .requestMatchers("/login**", "/oauth2/**").permitAll()
             .requestMatchers("/swagegr-ui.html").permitAll()
             .requestMatchers("/swagegr-ui/**").permitAll()
             .requestMatchers("/swagegr-ui.html").permitAll()
+            .requestMatchers("/user", "/token").authenticated()
                 //.requestMatchers("/users/**").authenticated()
-            .anyRequest().authenticated());
-
+            .anyRequest().authenticated())
+            .oauth2Login(oauth2 -> oauth2
+            .loginPage("/login")
+            .defaultSuccessUrl("http://localhost:3000/home")
+             // Set default success URL
+            // Always use default success URL
+          )
+        
+        .logout(logout -> logout
+            .logoutSuccessUrl("http://localhost:3000/login").permitAll()
+        );
     http.authenticationProvider(authenticationProvider());
 
     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
