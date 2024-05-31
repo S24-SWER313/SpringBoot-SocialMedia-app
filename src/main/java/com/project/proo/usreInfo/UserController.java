@@ -89,6 +89,7 @@ public class UserController {
         return null;
     }
 
+
     @GetMapping("/users/{userId}/friends")
     public ResponseEntity<CollectionModel<EntityModel<User>>> getUserFriends(@PathVariable Integer userId) {
         User user = userRepository.findById(userId)
@@ -181,6 +182,7 @@ public class UserController {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
+
         User friend = userRepository.findById(friendId)
                 .orElseThrow(() -> new UserNotFoundException(friendId));
 
@@ -217,3 +219,4 @@ public class UserController {
     }
 
 }
+
