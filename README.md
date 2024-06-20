@@ -16,6 +16,7 @@ The system includes comprehensive unit and integration tests for robust function
 * Hashtags: Implement a hashtag system to categorize and organize posts, making it easier for users to discover content related to specific topics or interests using the hashtag
 * High-Security Measures: Includes security features to protect user data.
 * Testing: Comprehensive testing for ensuring functionality and security.
+* Sign-in with Google: the user can sign in using a Google account.
   
 ## Getting Started 🛫
 Prerequisites: Ensure you have [ Java, Spring Boot ..].
